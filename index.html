@@ -121,7 +121,13 @@
     .map-controls .field { min-width:148px; margin:0; }
     .map-controls select { height:35px; }
     .map-stage { background:#eef5f0; border:1px solid #d4e3d8; border-radius:12px; overflow:hidden; }
-    .map-stage svg { display:block; width:100%; height:auto; min-height:245px; }
+    .map-stage svg { display:block; width:100%; height:500px; }
+    .map-stage .map-land { fill:#e1ebe2; stroke:#b9cec0; stroke-width:.045; pointer-events:none; }
+    .map-stage .map-pixels { image-rendering:pixelated; pointer-events:none; }
+    .map-stage .map-region.pixel-outline { fill:transparent; stroke:#6f857a; stroke-width:.035; }
+    .pixel-legend { display:flex; flex-wrap:wrap; align-items:center; gap:7px 15px; color:#405b4b; font-size:12px; }
+    .pixel-legend span { display:inline-flex; align-items:center; gap:5px; }
+    .pixel-legend i { display:inline-block; width:11px; height:11px; border-radius:2px; }
     .map-region { stroke:#f8fbf8; stroke-width:.085; cursor:pointer; transition:opacity .15s,filter .15s; }
     .map-region:hover,.map-region:focus { filter:brightness(.78); stroke:#173f32; stroke-width:.15; outline:none; }
     .map-region.is-selected { stroke:#102f27; stroke-width:.2; }
@@ -130,7 +136,7 @@
     .map-selected { margin-left:auto; color:#25513b; font-weight:700; }
     @media(max-width:1120px) { .cohort-controls { grid-template-columns:repeat(3,minmax(0,1fr)); } .cohort-grid { grid-template-columns:1fr; } }
     @media(max-width:1050px) { .metrics { grid-template-columns:repeat(2,1fr); } .grid-two { grid-template-columns:1fr; } }
-    @media(max-width:740px) { .shell { padding:18px 13px 35px; } .masthead { display:block; } .source-mark { text-align:left; margin-top:12px; } .layout { grid-template-columns:1fr; } .filters { position:static; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 14px; padding:18px; } .filters h2,.filter-note { grid-column:1/-1; } .filters .reset { align-self:end; margin-bottom:18px; } .metrics { gap:9px; } .metric { padding:15px; min-height:100px; } .card { padding:17px; } .map-selected { margin-left:0; } }
+    @media(max-width:740px) { .shell { padding:18px 13px 35px; } .masthead { display:block; } .source-mark { text-align:left; margin-top:12px; } .layout { grid-template-columns:1fr; } .filters { position:static; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 14px; padding:18px; } .filters h2,.filter-note { grid-column:1/-1; } .filters .reset { align-self:end; margin-bottom:18px; } .metrics { gap:9px; } .metric { padding:15px; min-height:100px; } .card { padding:17px; } .map-selected { margin-left:0; } .map-stage svg { height:320px; } }
     @media(max-width:600px) { .cohort-controls { grid-template-columns:repeat(2,minmax(0,1fr)); } .cohort-metrics { grid-template-columns:1fr; } }
     @media(max-width:420px) { .filters { grid-template-columns:1fr; } .metrics { grid-template-columns:1fr 1fr; } .metric .value { font-size:20px; } .ranking { grid-template-columns:minmax(85px,34%) minmax(0,1fr) 72px; gap:6px; } .cohort-bar { grid-template-columns:42px minmax(0,1fr) 75px; } .cohort-bar.unknown-row { grid-template-columns:86px minmax(0,1fr) 75px; } }
   </style>
@@ -146,11 +152,11 @@
     <div class="source-mark"><strong>REGIONAL PALM ATLAS</strong>Indonesia &amp; Malaysia<br>50 m sampled estimates</div>
   </header>
   <section class="panel card map-card" aria-label="Interactive regional palm map">
-    <div class="map-head"><div><h2>Interactive regional map</h2><p class="sub">Province and state outlines; color shows estimated palm area or share, not individual palm pixels. Select a region on the map.</p></div>
-      <div class="map-controls"><div class="field"><label for="map-mode">Map data</label><select id="map-mode"><option value="cohort">Planting cohorts · 1990–2024</option><option value="monthly">Monthly modeled age</option></select></div><div class="field"><label for="map-metric">Color by</label><select id="map-metric"><option value="area">Selected area · ha</option><option value="share">Share of mapped palm</option></select></div></div>
+    <div class="map-head"><div><h2>Interactive palm map</h2><p class="sub" id="map-description">TreeMap 2024 palm pixels by planting cohort, rendered at 500 m for a fast overview. Zoom to inspect plantations; select a province or state for its figures. This is a fixed 2024 snapshot.</p></div>
+      <div class="map-controls"><div class="field"><label for="map-mode">Map data</label><select id="map-mode"><option value="pixel">Palm pixels · 2024</option><option value="cohort">Regional planting cohorts</option><option value="monthly">Regional modeled age</option></select></div><div class="field"><label for="map-zoom">Zoom to</label><select id="map-zoom"><option value="all">Both countries</option><option value="malaysia">Malaysia</option><option value="sumatra">Sumatra</option><option value="borneo">Borneo</option><option value="java">Java</option></select></div><div class="field" id="map-metric-field"><label for="map-metric">Color by</label><select id="map-metric"><option value="area">Selected area · ha</option><option value="share">Share of mapped palm</option></select></div></div>
     </div>
     <div class="map-stage"><svg id="regional-map" viewBox="94 -8 48 21" role="img" aria-label="Regional palm area map of Indonesia and Malaysia" preserveAspectRatio="xMidYMid meet"></svg></div>
-    <div class="map-foot"><span>Low</span><span class="map-scale" aria-hidden="true"></span><span id="map-max">High</span><span id="map-selected" class="map-selected">Select a province or state</span></div>
+    <div class="map-foot"><div id="pixel-legend" class="pixel-legend"><span><i style="background:#f5bc43"></i>Planted 2023–24</span><span><i style="background:#009b73"></i>Planted 2016–22</span><span><i style="background:#773391"></i>2015 or earlier</span><span><i style="background:#808080"></i>Year unresolved</span></div><div id="regional-scale"><span>Low</span> <span class="map-scale" aria-hidden="true"></span> <span id="map-max">High</span></div><span id="map-selected" class="map-selected">Select a province or state</span></div>
   </section>
       <section class="panel card cohort-card" id="cohort-panel" aria-label="Planting-year cohorts within the 2024 mapped footprint">
         <div class="card-header"><h2 class="cohort-title">Planting cohorts, 1990–2024</h2><span class="tag">2024 footprint</span></div>
@@ -219,8 +225,8 @@
         <div class="table-scroll"><table><thead><tr><th scope="col">Province / state</th><th class="numeric" scope="col">Selected age</th><th class="numeric" scope="col">Mapped total</th><th class="numeric" scope="col">Share</th></tr></thead><tbody id="region-table"></tbody></table></div>
       </section>
       <section class="panel methods" aria-label="Method and interpretation">
-        <p><strong>Sources and pixel map:</strong> <a href="https://zenodo.org/records/20747717" target="_blank" rel="noopener">TreeMap 2024 v1.1</a> · <a href="https://zenodo.org/records/13379129" target="_blank" rel="noopener">Global Oil Palm 2021</a> · <a href="https://essd.copernicus.org/articles/16/5111/2024/" target="_blank" rel="noopener">ESSD method paper</a> · <a href="https://code.earthengine.google.com/4a803311b37603430083a77c424bcf17" target="_blank" rel="noopener">Run the Earth Engine pixel map</a> · <a href="earth_engine_viewer.js" download>Viewer code</a>.</p>
-        <p><strong>How to read this:</strong> The Global oil palm expansion 2001–2024 TreeMap (v1.1) was sampled at 50 m and allocated to 2023-vintage ADM1 boundaries. Areas are estimates, not an official planted-area census. “ADM1 boundary uncertain / unallocated” contributes to each country total but is not assigned to a province or state.</p>
+        <p><strong>Sources and pixel map:</strong> <a href="https://zenodo.org/records/20747717" target="_blank" rel="noopener">TreeMap 2024 v1.1</a> · <a href="https://zenodo.org/records/13379129" target="_blank" rel="noopener">Global Oil Palm 2021</a> · <a href="https://essd.copernicus.org/articles/16/5111/2024/" target="_blank" rel="noopener">ESSD method paper</a> · <a href="https://code.earthengine.google.com/40577ca5b0ba5eabb5f0ef1a89e94d06" target="_blank" rel="noopener">Earth Engine source-resolution map (click Run)</a> · <a href="earth_engine_viewer.js" download>Fast map code</a> · <a href="earth_engine_crosswalk_viewer.js" download>Planting-year crosswalk code</a>.</p>
+        <p><strong>How to read this:</strong> The pixel overview is a 500 m nearest-neighbor rendering of the TreeMap 2024 raster; use Earth Engine for source-resolution inspection. The regional area table was separately sampled at 50 m and allocated to 2023-vintage ADM1 boundaries. Areas are estimates, not an official planted-area census. “ADM1 boundary uncertain / unallocated” contributes to each country total but is not assigned to a province or state.</p>
         <p><strong>Age uncertainty:</strong> “Newly planted” means age 0 within the fixed 2024 footprint, not new planting in the selected month. Planting year is known for 2016–2024 cohorts, but planting month is not. A cohort spanning an age cutoff is shown as “age-band boundary uncertain.” In direct mode, palms planted in 2015 or earlier remain “prime / old unresolved”; other planting codes have unknown age. A zero in the old class does not imply no old palms.</p>
         <p><strong>Crosswalk estimate:</strong> The 2021 planting-year crosswalk estimates ages for some pre-2016 palms. Its 2.65-year RMSE and possible replanting between 2021 and 2024 limit precision. Remaining unresolved area stays in its own category. Both modes carry the same 2024 mapped footprint forward.</p>
       </section>
@@ -251,7 +257,7 @@
   const monthNames = data.months.map(s => new Date(`${s}-01T12:00:00Z`).toLocaleDateString("en-US", {timeZone:"UTC", month:"long", year:"numeric"}));
   let state = {evidence:0, country:"IDN", region:"all", month:data.months.length-1, palm:"all", age:"all", minimum:0};
   let cohortState = {country:"all", region:"all", palm:"all", from:1990, to:2024};
-  let mapMode = "cohort", mapMetric = "area";
+  let mapMode = "pixel", mapMetric = "area";
 
   function fmt(v) { return v >= 1000 ? nf0.format(v) : v >= 1 ? nf1.format(v) : nf2.format(v); }
   function pct(num, den) { return den > 0 ? `${(num / den * 100).toFixed(1)}%` : "—"; }
@@ -293,6 +299,16 @@
   }
   function renderMap() {
     const monthly=mapMode==="monthly";
+    const pixel=mapMode==="pixel";
+    const map=el("regional-map");
+    const views={all:"94 -8 48 21",malaysia:"99 -8 22 9",sumatra:"94 -6 13 13",borneo:"108 -8 12 9",java:"104 -9 11 5"};
+    map.setAttribute("viewBox",views[el("map-zoom").value]||views.all);
+    el("pixel-legend").style.display=pixel?"flex":"none";
+    el("regional-scale").style.display=pixel?"none":"block";
+    el("map-metric-field").style.display=pixel?"none":"block";
+    el("map-description").textContent=pixel ?
+      "TreeMap 2024 palm pixels by planting cohort, rendered at 500 m for a fast overview. Zoom to inspect plantations; select a province or state for its figures. This is a fixed 2024 snapshot." :
+      "Province and state colors show estimated palm area or share. Select a region on the map.";
     const included=data.mapPaths.map(([id]) => {
       const r=data.regions[id];
       const countryOk=monthly ? r.country===state.country : cohortState.country==="all" || r.country===cohortState.country;
@@ -303,10 +319,12 @@
     });
     const max=Math.max(0,...included.filter(x=>x.enabled).map(x=>x.value));
     const mapped=new Map(included.map(x=>[x.id,x]));
-    el("regional-map").innerHTML=data.mapPaths.map(([id,d]) => {
+    const land=pixel?data.mapPaths.map(([,d])=>`<path class="map-land" d="${d}"></path>`).join(""):"";
+    const raster=pixel?'<image class="map-pixels" href="palm_pixels_2024.png" x="94" y="-8" width="48" height="20" preserveAspectRatio="none"></image>':"";
+    map.innerHTML=land+raster+data.mapPaths.map(([id,d]) => {
       const x=mapped.get(id), selectedRegion=monthly ? state.region : cohortState.region;
       const title=`${x.r.name}, ${x.r.country}: ${nf2.format(x.area)} ha; ${pct(x.area,x.footprint)} of mapped palm`;
-      return `<path class="map-region${selectedRegion===String(id) ? " is-selected" : ""}" data-map-region="${id}" tabindex="0" role="button" aria-label="${escapeText(title)}" d="${d}" fill="${x.enabled ? mapColor(x.value,max) : "#d5dcd5"}" opacity="${x.enabled ? 1 : .48}"><title>${escapeText(title)}</title></path>`;
+      return `<path class="map-region${pixel ? " pixel-outline" : ""}${selectedRegion===String(id) ? " is-selected" : ""}" data-map-region="${id}" tabindex="0" role="button" aria-label="${escapeText(title)}" d="${d}" fill="${pixel ? "transparent" : x.enabled ? mapColor(x.value,max) : "#d5dcd5"}" opacity="${pixel ? 1 : x.enabled ? 1 : .48}"><title>${escapeText(title)}</title></path>`;
     }).join("");
     el("map-max").textContent=mapMetric==="share" ? `${max.toFixed(1)}%` : `${fmt(max)} ha`;
     const chosen=monthly ? state.region : cohortState.region;
@@ -480,6 +498,7 @@
     if (mapMode==="monthly") renderMap();
   }
   el("map-mode").addEventListener("change", event => { mapMode=event.target.value; renderMap(); });
+  el("map-zoom").addEventListener("change", renderMap);
   el("map-metric").addEventListener("change", event => { mapMetric=event.target.value; renderMap(); });
   el("evidence").addEventListener("change", event => { state.evidence=Number(event.target.value); render(); });
   el("country").addEventListener("change", event => { state.country=event.target.value; state.region="all"; refreshRegionOptions(); render(); });
@@ -501,6 +520,7 @@
   renderCohorts();
   refreshRegionOptions();
   render();
+  renderMap();
 })();
 </script>
 </body>
