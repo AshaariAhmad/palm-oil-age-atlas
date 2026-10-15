@@ -14,7 +14,7 @@ var TREEMAP_ID =
 var YOP_2021_ID =
   'projects/ee-globaloilpalm/assets/shared/GlobalOilPalm_YoP_2021';
 var GAUL_ID = 'FAO/GAUL/2025/level1';
-var AREA_CRS = 'EPSG:6933';
+var AREA_CRS = 'EPSG:4326'; // Parseable in Earth Engine; pixelArea remains geodesic.
 var AREA_SCALE_M = 100; // Responsive sample of 10 m and 30 m inputs.
 var BOUNDS = ee.Geometry.Rectangle([94, -12, 142, 8]);
 
@@ -72,7 +72,7 @@ function countryFeatures() {
 function regionFeatures() {
   var provinces = countryFeatures();
   var code = provinceSelect.getValue();
-  return code === 'ALL' ? provinces :
+  return !code || code === 'ALL' ? provinces :
     provinces.filter(ee.Filter.eq('GAUL1_CODE', Number(code)));
 }
 
